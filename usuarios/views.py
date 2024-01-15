@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.messages import constants
+from django.contrib import auth
 
 def cadastro(request):
     if request.method == 'GET':
@@ -26,9 +27,25 @@ def cadastro(request):
                 username=username,
                 password=senha
             )
-            return 
+            return redirect('/usuarios/logar/')
         
         except:
             messages.add_message(request, constants.ERROR, 'Erro interno do servidor!')
             return redirect('/usuarios/cadastro/')
             
+def logar(request):
+    if request.method == 'GET':
+        return render(request, 'login.html')
+    else:
+        username = request.POST.get('username')
+        senha = request.POST.get('senha')
+
+        user = auth.authenticate(request, username=username, password=senha)
+
+        if user:
+            auth.login(request, user)
+            messages.add_message(request, constants.SUCCESS, 'Logado!')
+            return redirect('/flashcard/novo_flashcard/')
+        else:
+            messages.add_message(request, constants.ERROR, 'Username ou senha inválidos!')
+            return redirect('/usuarios/logar/')
